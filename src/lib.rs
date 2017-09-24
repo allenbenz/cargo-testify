@@ -1,6 +1,9 @@
 extern crate notify;
 extern crate regex;
+#[cfg(not(target_os = "windows"))]
 extern crate notify_rust;
+#[cfg(target_os = "windows")]
+extern crate winrt_notification;
 extern crate clap;
 #[macro_use] extern crate error_chain;
 

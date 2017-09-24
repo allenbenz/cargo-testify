@@ -1,5 +1,9 @@
 use notify::{RecommendedWatcher, Watcher, Event};
+
+#[cfg(not(target_os = "windows"))]
 use notify_rust::Notification;
+#[cfg(target_os = "windows")]
+use winrt_notification;
 
 use std::process::{Command, Stdio};
 use std::time::Instant;
@@ -128,6 +132,7 @@ impl<'a> Reactor<'a> {
     }
 }
 
+#[cfg(not(target_os = "windows"))]
 fn notify(report: Report) {
     let icon = match report.outcome {
         Outcome::TestsPassed => "face-angel",
@@ -145,6 +150,24 @@ fn notify(report: Report) {
         .expect("unable to send notification");
 }
 
+#[cfg(target_os = "windows")]
+fn notify(report: Report) {
+    let icon = match report.outcome {
+        Outcome::TestsPassed => "🔵",
+        Outcome::TestsFailed | Outcome::CompileError => "🔴"
+    };
+    let sound = match report.outcome {
+        Outcome::TestsPassed | Outcome::CompileError => None,
+        Outcome::TestsFailed => Some(winrt_notification::Sound::SMS)
+    };
+    winrt_notification::Toast::new("cargo-testify")
+        .title(&format!("{} {}", report.title(), icon))
+        .text1(&report.detail.unwrap_or("".to_owned()))
+        .sound(sound)
+        .duration(winrt_notification::Duration::Short)
+        .show()
+        .expect("unable to send notification");
+}
 
 /// Should changes in `path` file trigger running the test suite?
 fn filter_allows(project_dir: &Path, path: &Path) -> bool {
