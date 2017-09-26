@@ -79,7 +79,7 @@ impl<'a> Reactor<'a> {
         args.insert(0, "test");
 
         let result = Command::new("cargo")
-            .args(args)
+            .args(&args)
             .stdout(Stdio::piped())
             .stderr(Stdio::piped())
             .spawn();
@@ -97,7 +97,7 @@ impl<'a> Reactor<'a> {
                         let mut buffer = stdout_buffer_clone.lock().unwrap();
                         buffer.push_str(&line);
                         buffer.push('\n');
-                        println!("{}", line);
+                        //println!("{}", line);
                     }
                 });
 
@@ -112,7 +112,7 @@ impl<'a> Reactor<'a> {
                         let mut buffer = stderr_buffer_clone.lock().unwrap();
                         buffer.push_str(&line);
                         buffer.push('\n');
-                        eprintln!("{}", line);
+                        //eprintln!("{}", line);
                     }
                 });
 
@@ -129,6 +129,11 @@ impl<'a> Reactor<'a> {
                 process::exit(1);
             }
         }
+
+        Command::new("cargo")
+            .args(args)
+            .spawn()
+            .expect("write to console cargo test run failed");
     }
 }
 
